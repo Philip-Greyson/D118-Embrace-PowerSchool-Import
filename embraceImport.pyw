@@ -6,7 +6,6 @@ Connects to the Embrace SFTP server using the connection details they provided t
 Then takes the information from just the desired columns and exports it in a tab delimited file starting with the student ID number.
 Takes that file and uploads it to our local SFTP server in order to be imported into PowerSchool
 
-Needs oracledb: pip install oracledb --upgrade
 Needs pysftp: pip install pysftp --upgrade
 """
 
