@@ -55,58 +55,58 @@ if __name__ == '__main__':  # main file execution
                 # print(sftp.pwd)
                 # print(sftp.listdir())
                 sftp.get(EMBRACE_FILE_NAME, 'embrace_file.csv')  # just save the file to the local directory and call it embrace_file.csv
-        except Exception as er:
-            print(f'ERROR while connecting to Embrace SFTP server: {er}')
-            print(f'ERROR while connecting to Embrace SFTP server: {er}', file=log)
 
-        try:
-            # Process the downloaded file, extract the fields we care about and export it into a new import file
-            with open('embrace_file.csv', encoding='utf-8') as inputFile:  # open the file saved above
-                with open(OUTPUT_FILE_NAME, 'w', encoding='utf-8') as outputFile:  # open a new output file that we will upload to PowerSchool
-                    lines = csv.reader(inputFile, delimiter=',')  # open the input file as a csv file https://docs.python.org/3/library/csv.html
-                    for line in lines:  # go through each line in the csv, which is an individual student
-                        try:  # each line can go into a try block so we can skip a single line/student in the event of an error
-                            fields = []  # create blank list each line for each student's data
-                            studentNum = line[STUDENT_ID_COLUMN]
-                            for column in COLUMNS_TO_EXPORT:  # go through the list of columns we want, and append them to our fields data list
-                                fields.append(line[column])
-                            if all(values == '' for values in fields):  # check to see if all our values that we got above are blank, so we can skip that student from the output
-                                # print(f'WARN: {studentNum} has no data in selected columns')  # debug to see who has no data in the columns we care about
-                                print(f'WARN: {studentNum} has no data in selected columns', file=log)
-                            else:
-                                if studentNum == '':  # check to see if there is no student ID number for the student
-                                    print(f'WARN: {line[1]} {line[2]}, embrace ID {line[0]} does not have a student ID number, skipping')
+            try:
+                # Process the downloaded file, extract the fields we care about and export it into a new import file
+                with open('embrace_file.csv', encoding='utf-8') as inputFile:  # open the file saved above
+                    with open(OUTPUT_FILE_NAME, 'w', encoding='utf-8') as outputFile:  # open a new output file that we will upload to PowerSchool
+                        lines = csv.reader(inputFile, delimiter=',')  # open the input file as a csv file https://docs.python.org/3/library/csv.html
+                        for line in lines:  # go through each line in the csv, which is an individual student
+                            try:  # each line can go into a try block so we can skip a single line/student in the event of an error
+                                fields = []  # create blank list each line for each student's data
+                                studentNum = line[STUDENT_ID_COLUMN]
+                                for column in COLUMNS_TO_EXPORT:  # go through the list of columns we want, and append them to our fields data list
+                                    fields.append(line[column])
+                                if all(values == '' for values in fields):  # check to see if all our values that we got above are blank, so we can skip that student from the output
+                                    # print(f'WARN: {studentNum} has no data in selected columns')  # debug to see who has no data in the columns we care about
+                                    print(f'WARN: {studentNum} has no data in selected columns', file=log)
                                 else:
-                                    outputString = studentNum + "\t"  # start the output string with their student id number and a tab for delimiting
-                                    for i in range(len(fields)):  # go through our fields and append them to our output string
-                                        outputString = outputString + fields[i] + '\t'
-                                    outputString = outputString.rstrip(outputString[-1])  # use rstrip to remove just the last character of the output string, which is an additional \t delimiter that is not needed
-                                    print(outputString)
-                                    print(outputString, file=outputFile)  # output the string to our file that is imported to PowerSchool
-                        except Exception as er:
-                            print(f'ERROR while processing student {line[STUDENT_ID_COLUMN]}: {er}')
-                            print(f'ERROR while processing student {line[STUDENT_ID_COLUMN]}: {er}', file=log)
-        except Exception as er:
-            print(f'ERROR while opening local csv file for processing: {er}')
-            print(f'ERROR while opening local csv file for processing: {er}', file=log)
+                                    if studentNum == '':  # check to see if there is no student ID number for the student
+                                        print(f'WARN: {line[1]} {line[2]}, embrace ID {line[0]} does not have a student ID number, skipping')
+                                    else:
+                                        outputString = studentNum + "\t"  # start the output string with their student id number and a tab for delimiting
+                                        for i in range(len(fields)):  # go through our fields and append them to our output string
+                                            outputString = outputString + fields[i] + '\t'
+                                        outputString = outputString.rstrip(outputString[-1])  # use rstrip to remove just the last character of the output string, which is an additional \t delimiter that is not needed
+                                        print(outputString)
+                                        print(outputString, file=outputFile)  # output the string to our file that is imported to PowerSchool
+                            except Exception as er:
+                                print(f'ERROR while processing student {line[STUDENT_ID_COLUMN]}: {er}')
+                                print(f'ERROR while processing student {line[STUDENT_ID_COLUMN]}: {er}', file=log)
+            except Exception as er:
+                print(f'ERROR while opening local csv file for processing: {er}')
+                print(f'ERROR while opening local csv file for processing: {er}', file=log)
 
-        try:
-            # Now connect to the D118 SFTP server and upload the file to be imported into PowerSchool
-            with pysftp.Connection(D118_SFTP_HOST, username=D118_SFTP_UN, password=D118_SFTP_PW, cnopts=CNOPTS) as sftp:
-                print(f'INFO: SFTP connection to D118 at {D118_SFTP_HOST} successfully established')
-                print(f'INFO: SFTP connection to D118 at {D118_SFTP_HOST} successfully established', file=log)
-                # print(sftp.pwd)  # debug to show current directory
-                # print(sftp.listdir())  # debug to show files and directories in our location
-                sftp.chdir(OUTPUT_FILE_DIRECTORY)
-                # print(sftp.pwd) # debug to show current directory
-                # print(sftp.listdir())  # debug to show files and directories in our location
-                sftp.put(OUTPUT_FILE_NAME)  # upload the file to our sftp server
+            try:
+                # Now connect to the D118 SFTP server and upload the file to be imported into PowerSchool
+                with pysftp.Connection(D118_SFTP_HOST, username=D118_SFTP_UN, password=D118_SFTP_PW, cnopts=CNOPTS) as sftp:
+                    print(f'INFO: SFTP connection to D118 at {D118_SFTP_HOST} successfully established')
+                    print(f'INFO: SFTP connection to D118 at {D118_SFTP_HOST} successfully established', file=log)
+                    # print(sftp.pwd)  # debug to show current directory
+                    # print(sftp.listdir())  # debug to show files and directories in our location
+                    sftp.chdir(OUTPUT_FILE_DIRECTORY)
+                    # print(sftp.pwd) # debug to show current directory
+                    # print(sftp.listdir())  # debug to show files and directories in our location
+                    sftp.put(OUTPUT_FILE_NAME)  # upload the file to our sftp server
+            except Exception as er:
+                print(f'ERROR while connecting to D118 SFTP server: {er}')
+                print(f'ERROR while connecting to D118 SFTP server: {er}', file=log)
+
         except Exception as er:
-            print(f'ERROR while connecting to D118 SFTP server: {er}')
-            print(f'ERROR while connecting to D118 SFTP server: {er}', file=log)
+            print(f'ERROR while connecting to Embrace SFTP server, ending execution: {er}')
+            print(f'ERROR while connecting to Embrace SFTP server, ending execution: {er}', file=log)
 
         endTime = datetime.now()
         endTime = endTime.strftime('%H:%M:%S')
         print(f'INFO: Execution ended at {endTime}')
         print(f'INFO: Execution ended at {endTime}', file=log)
-
